@@ -1,5 +1,24 @@
 #!/usr/bin/env bash
 
+debug=0
+
+while (( "$#" )); do
+  case "$1" in
+    -d|--debug)
+      debug=1
+      shift
+      ;;
+    *) # preserve positional arguments
+      shift
+      ;;
+  esac
+done
+
+pkgndebug=1
+if [ "$debug" = "1" ]; then
+	pkgndebug=0
+fi
+
 builddir=$(mktemp -d)
 outdir=$(pwd)
 os=$(uname)
@@ -16,7 +35,7 @@ sed 's/TOOL_NAME = libhookerTest//' Makefile > Makefile2
 mv Makefile2 Makefile
 sed 's/libhookerTest/# libhookerTest/' Makefile > Makefile2
 mv Makefile2 Makefile
-make package FINALPACKAGE=1 -j4
+make package FINALPACKAGE=$pkgndebug -j4
 mv packages/*.deb $builddir/libhooker.deb
 popd
 
@@ -27,7 +46,7 @@ if [ "$os" != "Darwin" ]; then
     rm -rf xpc
     cp -r $builddir/libxpc/xpc .
 fi
-make package FINALPACKAGE=1 -j4
+make package FINALPACKAGE=$pkgndebug -j4
 mv packages/*.deb $builddir/tweakinject.deb
 cd ..
 
@@ -38,7 +57,10 @@ update_makefile() {
     fi
     sed 's/ldid2/ldid/' Makefile > Makefile2
     mv Makefile2 Makefile
-    if [ "$os" != "Darwin" ]; then
+    if [ "$debug" = "1" ]; then
+		sed 's/strip/@# strip/' Makefile > Makefile2
+        mv Makefile2 Makefile
+	elif [ "$os" != "Darwin" ]; then
         sed "s@strip@$THEOS/toolchain/linux/iphone/bin/strip@" Makefile > Makefile2
         mv Makefile2 Makefile
     fi
