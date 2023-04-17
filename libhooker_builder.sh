@@ -87,7 +87,7 @@ mkdir -p build/usr/lib
 mkdir -p build/usr/lib/TweakInject
 mkdir -p build/usr/libexec/libhooker
 mkdir -p build/Library
-mkdir -p build/Library/MobileSubstrate/DynamicLibraries
+mkdir -p build/Library/MobileSubstrate
 mkdir -p build/Library/Frameworks/CydiaSubstrate.framework
 mkdir -p build/etc/rc.d
 ln -s /usr/lib/TweakInject build/Library/MobileSubstrate/DynamicLibraries
