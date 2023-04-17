@@ -52,7 +52,7 @@ cd ..
 
 update_makefile() {
     if [ "$os" != "Darwin" ]; then
-        sed "s@xcrun -sdk iphoneos clang@$THEOS/toolchain/linux/iphone/bin/clang -fuse-ld=$THEOS/toolchain/linux/iphone/bin/ld -target arm64-apple-ios -isysroot $THEOS/sdks/iPhoneOS14.5.sdk@" Makefile > Makefile2
+        sed "s@xcrun -sdk iphoneos clang@$THEOS/toolchain/linux/iphone/bin/clang -fuse-ld=$THEOS/toolchain/linux/iphone/bin/ld -target arm64-apple-ios -isysroot $THEOS/sdks/iPhoneOS14.5.sdk -miphoneos-version-min=11.0@" Makefile > Makefile2
         mv Makefile2 Makefile
     fi
     sed 's/ldid2/ldid/' Makefile > Makefile2
