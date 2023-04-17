@@ -10,6 +10,12 @@ if [ "$os" != "Darwin" ]; then
 fi
 # build libhooker
 pushd $builddir/libhooker
+sed 's/libhooker_LINKAGE_TYPE = both//' Makefile > Makefile2
+mv Makefile2 Makefile
+sed 's/TOOL_NAME = libhookerTest//' Makefile > Makefile2
+mv Makefile2 Makefile
+sed 's/libhookerTest/# libhookerTest/' Makefile > Makefile2
+mv Makefile2 Makefile
 make package -j4
 mv packages/*.deb $builddir/libhooker.deb
 popd
@@ -27,7 +33,7 @@ cd ..
 
 update_makefile() {
     if [ "$os" != "Darwin" ]; then
-        sed "s@xcrun -sdk iphoneos clang@clang -fuse-ld=lld -target arm64-apple-ios -isysroot $THEOS/sdks/iPhoneOS14.5.sdk -miphoneos-version-min=11.0@" Makefile > Makefile2
+        sed "s@xcrun -sdk iphoneos clang@$THEOS/toolchain/linux/iphone/bin/clang -fuse-ld=$THEOS/toolchain/linux/iphone/bin/ld -target arm64-apple-ios -isysroot $THEOS/sdks/iPhoneOS14.5.sdk@" Makefile > Makefile2
         mv Makefile2 Makefile
     fi
     sed 's/ldid2/ldid/' Makefile > Makefile2
@@ -50,11 +56,9 @@ if [ "$os" != "Darwin" ]; then
     curl -LO https://raw.githubusercontent.com/apple-oss-distributions/xnu/rel/xnu-8792/EXTERNAL_HEADERS/ptrauth.h
     sed 's/<ptrauth.h>/"ptrauth.h"/' dylib-inject.c > dylib-inject.c.new
     mv dylib-inject.c.new dylib-inject.c
-    sed 's/-arch arm64e//' Makefile > Makefile2
-    mv Makefile2 Makefile
 fi
 make -j4
-mv bin/libsyringe $builddir
+mv bin/libsyringe $builddir/libsyringe
 cd ..
 
 cd libhooker-starter
@@ -63,15 +67,21 @@ make -j4
 mv bin/libhooker $builddir/rcd-libhooker
 cd ..
 
+if [ "$os" != "Darwin" ]; then
+    cd fishhook
+    sed 's/#include <stdint.h>/#include <stdint.h>\n#include "ptrauth.h"/' fishhook.h > fishhook.h.new
+    mv fishhook.h.new fishhook.h
+    cd ..
+fi
+
 cd pspawn_payload
 if [ "$os" != "Darwin" ]; then
-  sed 's/ cc/ clang/' Makefile > Makefile2
-  mv Makefile2 Makefile
+    sed 's/ cc/ clang/' Makefile > Makefile2
+    mv Makefile2 Makefile
 fi
 update_makefile
 if [ "$os" != "Darwin" ]; then
-  sed 's/-arch arm64e//' Makefile > Makefile2
-  mv Makefile2 Makefile
+    curl -LO https://raw.githubusercontent.com/apple-oss-distributions/xnu/rel/xnu-8792/EXTERNAL_HEADERS/ptrauth.h
 fi
 make -j4
 cp bin/pspawn_payload.dylib $builddir
@@ -83,6 +93,7 @@ pushd $builddir
 # everything is built, generate our deb
 dpkg-deb -R libhooker.deb build
 dpkg-deb -R tweakinject.deb tinject
+mkdir -p build/usr/bin
 mkdir -p build/usr/lib
 mkdir -p build/usr/lib/TweakInject
 mkdir -p build/usr/libexec/libhooker
@@ -93,14 +104,14 @@ mkdir -p build/etc/rc.d
 ln -s /usr/lib/TweakInject build/Library/MobileSubstrate/DynamicLibraries
 ln -s /usr/lib/TweakInject build/Library/TweakInject
 ln -s /usr/lib/libsubstrate.dylib build/Library/Frameworks/CydiaSubstrate.framework/CydiaSubstrate
+ln -s libsubstitute.dylib build/usr/lib/libsubstitute.0.dylib
 mv tinject/Library/MobileSubstrate/DynamicLibraries/TweakInject.dylib build/usr/lib/TweakInject.dylib
 rm -rf tinject
 mv rcd-libhooker build/etc/rc.d/libhooker
 mv inject_criticald build/usr/libexec/libhooker/inject_criticald
 mv pspawn_payload.dylib build/usr/libexec/libhooker/pspawn_payload.dylib
 cp libsyringe build/usr/libexec/libhooker/libsyringe
-cp libsyringe build/usr/libexec/libhooker/libsyringe-13
-cp libsyringe build/usr/libexec/libhooker/libsyringe-14
+ln -s /usr/libexec/libhooker/libsyringe build/usr/bin/cynject
 
 # files are in place, setup DEBIAN things
 cat <<EOF > build/DEBIAN/control
