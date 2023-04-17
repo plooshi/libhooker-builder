@@ -16,7 +16,7 @@ sed 's/TOOL_NAME = libhookerTest//' Makefile > Makefile2
 mv Makefile2 Makefile
 sed 's/libhookerTest/# libhookerTest/' Makefile > Makefile2
 mv Makefile2 Makefile
-make package -j4
+make package  FINALPACKAGE=1 -j4
 mv packages/*.deb $builddir/libhooker.deb
 popd
 
@@ -27,7 +27,7 @@ if [ "$os" != "Darwin" ]; then
     rm -rf xpc
     cp -r $builddir/libxpc/xpc .
 fi
-make package -j4
+make package  FINALPACKAGE=1 -j4
 mv packages/*.deb $builddir/tweakinject.deb
 cd ..
 
