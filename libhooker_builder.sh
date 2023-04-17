@@ -1,8 +1,13 @@
+#!/usr/bin/env bash
+
 builddir=$(mktemp -d)
 outdir=$(pwd)
+os=$(uname)
 git clone https://github.com/coolstar/libhooker $builddir/libhooker
 git clone https://github.com/coolstar/libhooker-basebins $builddir/basebins
-git clone https://github.com/jceel/libxpc $builddir/libxpc
+if [ "$os" != "Darwin" ]; then
+    git clone https://github.com/jceel/libxpc $builddir/libxpc
+fi
 # build libhooker
 pushd $builddir/libhooker
 make package -j4
@@ -12,19 +17,25 @@ popd
 # build basebins
 pushd $builddir/basebins
 cd tweakinject
-rm -rf xpc
-cp -r $builddir/libxpc/xpc .
+if [ "$os" != "Darwin" ]; then
+    rm -rf xpc
+    cp -r $builddir/libxpc/xpc .
+fi
 make package -j4
 mv packages/*.deb $builddir/tweakinject.deb
 cd ..
 
 update_makefile() {
-    sed "s@xcrun -sdk iphoneos clang@clang -fuse-ld=lld -target arm64-apple-ios -isysroot $THEOS/sdks/iPhoneOS14.5.sdk -miphoneos-version-min=11.0@" Makefile > Makefile2
-    mv Makefile2 Makefile
+    if [ "$os" != "Darwin" ]; then
+        sed "s@xcrun -sdk iphoneos clang@clang -fuse-ld=lld -target arm64-apple-ios -isysroot $THEOS/sdks/iPhoneOS14.5.sdk -miphoneos-version-min=11.0@" Makefile > Makefile2
+        mv Makefile2 Makefile
+    fi
     sed 's/ldid2/ldid/' Makefile > Makefile2
     mv Makefile2 Makefile
-    sed "s@strip@$THEOS/toolchain/linux/iphone/bin/strip@" Makefile > Makefile2
-    mv Makefile2 Makefile
+    if [ "$os" != "Darwin" ]; then
+        sed "s@strip@$THEOS/toolchain/linux/iphone/bin/strip@" Makefile > Makefile2
+        mv Makefile2 Makefile
+    fi
 }
 
 cd inject_criticald3
@@ -35,11 +46,13 @@ cd ..
 
 cd libsyringe
 update_makefile
-curl -LO https://raw.githubusercontent.com/apple-oss-distributions/xnu/rel/xnu-8792/EXTERNAL_HEADERS/ptrauth.h
-sed 's/<ptrauth.h>/"ptrauth.h"/' dylib-inject.c > dylib-inject.c.new
-mv dylib-inject.c.new dylib-inject.c
-sed 's/-arch arm64e//' Makefile > Makefile2
-mv Makefile2 Makefile
+if [ "$os" != "Darwin" ]; then
+    curl -LO https://raw.githubusercontent.com/apple-oss-distributions/xnu/rel/xnu-8792/EXTERNAL_HEADERS/ptrauth.h
+    sed 's/<ptrauth.h>/"ptrauth.h"/' dylib-inject.c > dylib-inject.c.new
+    mv dylib-inject.c.new dylib-inject.c
+    sed 's/-arch arm64e//' Makefile > Makefile2
+    mv Makefile2 Makefile
+fi
 make -j4
 mv bin/libsyringe $builddir
 cd ..
@@ -51,11 +64,15 @@ mv bin/libhooker $builddir/rcd-libhooker
 cd ..
 
 cd pspawn_payload
-sed 's/ cc/ clang/' Makefile > Makefile2
-mv Makefile2 Makefile
+if [ "$os" != "Darwin" ]; then
+  sed 's/ cc/ clang/' Makefile > Makefile2
+  mv Makefile2 Makefile
+fi
 update_makefile
-sed 's/-arch arm64e//' Makefile > Makefile2
-mv Makefile2 Makefile
+if [ "$os" != "Darwin" ]; then
+  sed 's/-arch arm64e//' Makefile > Makefile2
+  mv Makefile2 Makefile
+fi
 make -j4
 cp bin/pspawn_payload.dylib $builddir
 cd ..
