@@ -110,7 +110,7 @@ update_makefile
 cd ..
 
 # build basebins
-make ROOTLESS=$rootless -j4
+make DEBUG=$debug ROOTLESS=$rootless -j4
 
 mv bin/inject_criticald $builddir/inject_criticald
 mv bin/libsyringe $builddir/libsyringe
