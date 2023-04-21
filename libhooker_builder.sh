@@ -2,6 +2,7 @@
 
 debug=0
 rootless=0
+version=1.1.0
 theos_mflags="FINALPACKAGE=1"
 arch="iphoneos-arm"
 build="build/"
@@ -146,14 +147,14 @@ ln -s $path/usr/libexec/libhooker/libsyringe $build/usr/bin/cynject
 
 # files are in place, setup DEBIAN things
 cat <<EOF > build/DEBIAN/control
-Package: org.coolstar.libhooker-oss
+Package: dev.ploosh.libhooker-oss
 Architecture: $arch
 Name: libhooker-oss
 Description: libhooker, open source edition.
 Author: Ploosh <me@ploosh.dev>, CoolStar <coolstarorganization@gmail.com>
 Icon: https://repo.ploosh.dev/assets/libhooker-oss.png
 SileoDepiction: https://repo.ploosh.dev/meta/libhooker-oss.json
-Version: 1.0.0
+Version: $version
 Maintainer: Ploosh <me@ploosh.dev>
 Section: System
 Depends: firmware (>= 11.0), cy+cpu.arm64, org.coolstar.safemode
@@ -235,7 +236,7 @@ chmod +x build/DEBIAN/prerm
 chmod +x build/DEBIAN/postinst
 
 # DEBIAN is setup, build the deb
-dpkg-deb -Zxz -b build org.coolstar.libhooker-oss_1.0.0_$arch.deb
-mv org.coolstar.libhooker-oss_1.0.0_$arch.deb $outdir
+dpkg-deb -Zxz -b build dev.ploosh.libhooker-oss_$version_$arch.deb
+mv dev.ploosh.libhooker-oss_$version_$arch.deb $outdir
 popd
 rm -rf $builddir
