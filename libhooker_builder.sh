@@ -236,7 +236,7 @@ chmod +x build/DEBIAN/prerm
 chmod +x build/DEBIAN/postinst
 
 # DEBIAN is setup, build the deb
-dpkg-deb -Zxz -b build dev.ploosh.libhooker-oss_$version_$arch.deb
-mv dev.ploosh.libhooker-oss_$version_$arch.deb $outdir
+dpkg-deb -Zxz -b build dev.ploosh.libhooker-oss_${version}_$arch.deb
+mv dev.ploosh.libhooker-oss_${version}_$arch.deb $outdir
 popd
 rm -rf $builddir
