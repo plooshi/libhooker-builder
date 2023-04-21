@@ -139,11 +139,11 @@ ln -s /usr/libexec/libhooker/libsyringe build/usr/bin/cynject
 cat <<EOF > build/DEBIAN/control
 Package: org.coolstar.libhooker-oss
 Architecture: iphoneos-arm
-Name: libhooker
+Name: libhooker-oss
 Description: libhooker, open source edition.
-Author: CoolStar <coolstarorganization@gmail.com>
-Icon: https://repo.theodyssey.dev/depictions/icons/libhooker.png
-SileoDepiction: https://repo.theodyssey.dev/depictions/json/libhooker.json
+Author: Ploosh <me@ploosh.dev>, CoolStar <coolstarorganization@gmail.com>
+Icon: https://repo.ploosh.dev/assets/libhooker-oss.png
+SileoDepiction: https://repo.ploosh.dev/meta/libhooker-oss.json
 Version: 1.0.0
 Maintainer: Ploosh <me@ploosh.dev>
 Section: System
