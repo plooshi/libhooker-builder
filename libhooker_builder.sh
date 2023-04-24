@@ -144,6 +144,10 @@ mv inject_criticald $build/usr/libexec/libhooker/inject_criticald
 mv pspawn_payload.dylib $build/usr/libexec/libhooker/pspawn_payload.dylib
 cp libsyringe $build/usr/libexec/libhooker/libsyringe
 ln -s $path/usr/libexec/libhooker/libsyringe $build/usr/bin/cynject
+chmod +x $build/etc/rc.d/libhooker
+chmod +x $build/usr/libexec/libhooker/inject_criticald
+chmod +x $build/usr/libexec/libhooker/libsyringe
+chmod +x $build/usr/bin/cynject
 
 # files are in place, setup DEBIAN things
 cat <<EOF > build/DEBIAN/control
